@@ -3,12 +3,15 @@ import Header from "./components/Header"
 import ScorePanel from "./components/ScorePanel"
 import GameSlot from "./components/GameSlot"
 import PlayerModal from "./components/PlayerModal"
+import { validatePlayerSelection } from "./utils/validation"
 
 const gameSlots = [
   {
     id: 1,
     club: "FC Barcelona",
     period: "2015/16–2022/23",
+    seasonFrom: 2015,
+    seasonTo: 2022,
     position: "Forward",
     scoreCategory: "Goals",
     scoreMetric: "goals",
@@ -17,6 +20,8 @@ const gameSlots = [
     id: 2,
     club: "Manchester City",
     period: "2018/19–2024/25",
+    seasonFrom: 2018,
+    seasonTo: 2024,
     position: "Midfielder",
     scoreCategory: "Assists",
     scoreMetric: "assists",
@@ -25,6 +30,8 @@ const gameSlots = [
     id: 3,
     club: "Bayern Munich",
     period: "2012/13–2021/22",
+    seasonFrom: 2012,
+    seasonTo: 2021,
     position: "Forward",
     scoreCategory: "Goals",
     scoreMetric: "goals",
@@ -33,6 +40,8 @@ const gameSlots = [
     id: 4,
     club: "Real Madrid",
     period: "2014/15–2023/24",
+    seasonFrom: 2014,
+    seasonTo: 2023,
     position: "Defender",
     scoreCategory: "Appearances",
     scoreMetric: "appearances",
@@ -41,6 +50,8 @@ const gameSlots = [
     id: 5,
     club: "Liverpool",
     period: "2017/18–2024/25",
+    seasonFrom: 2017,
+    seasonTo: 2024,
     position: "Goalkeeper",
     scoreCategory: "Appearances",
     scoreMetric: "appearances",
@@ -61,7 +72,22 @@ function App() {
   }, [selections])
 
   const handleConfirmSelection = ({ player, season }) => {
-    const score = season[activeSlot.scoreMetric] ?? 0
+    if (!activeSlot) {
+      return ["Nie znaleziono aktywnego pola gry."]
+    }
+
+    const validationErrors = validatePlayerSelection({
+      slot: activeSlot,
+      player,
+      season,
+      selections,
+    })
+
+    if (validationErrors.length > 0) {
+      return validationErrors
+    }
+
+    const score = Number(season[activeSlot.scoreMetric] ?? 0)
 
     setSelections((currentSelections) => ({
       ...currentSelections,
@@ -73,6 +99,8 @@ function App() {
     }))
 
     setActiveSlot(null)
+
+    return []
   }
 
   return (
@@ -141,6 +169,10 @@ function App() {
       <PlayerModal
         isOpen={Boolean(activeSlot)}
         slot={activeSlot}
+        selections={selections}
+        currentSelection={
+          activeSlot ? selections[activeSlot.id] ?? null : null
+        }
         onClose={() => setActiveSlot(null)}
         onConfirm={handleConfirmSelection}
       />

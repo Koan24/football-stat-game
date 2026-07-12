@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Position {
+  GOALKEEPER
+  DEFENDER
+  MIDFIELDER
+  FORWARD
+  UNKNOWN
+}
+
+model Player {
+  id             Int            @id @default(autoincrement())
+  apiId          Int            @unique
+  name           String
+  normalizedName String
+  firstName      String?
+  lastName       String?
+  nationality    String?
+  birthDate      DateTime?
+  height         String?
+  weight         String?
+  photoUrl       String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  statistics     PlayerSeason[]
+
+  @@index([normalizedName])
+}
+
+model Club {
+  id         Int            @id @default(autoincrement())
+  apiId      Int            @unique
+  name       String
+  country    String?
+  logoUrl    String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  statistics PlayerSeason[]
+}
+
+model Competition {
+  id         Int            @id @default(autoincrement())
+  apiId      Int            @unique
+  name       String
+  country    String?
+  type       String?
+  logoUrl    String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  statistics PlayerSeason[]
+}
+
+model Season {
+  id         Int            @id @default(autoincrement())
+  startYear  Int
+  label      String         @unique
+  createdAt  DateTime       @default(now())
+  statistics PlayerSeason[]
+}
+
+model PlayerSeason {
+  id            Int         @id @default(autoincrement())
+  playerId      Int
+  clubId        Int
+  competitionId Int
+  seasonId      Int
+  position      Position    @default(UNKNOWN)
+  appearances   Int         @default(0)
+  starts        Int         @default(0)
+  minutes       Int         @default(0)
+  goals         Int         @default(0)
+  assists       Int         @default(0)
+  yellowCards   Int         @default(0)
+  redCards      Int         @default(0)
+  cleanSheets   Int         @default(0)
+  rating        Float?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  player        Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  club          Club        @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  season        Season      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, clubId, competitionId, seasonId])
+  @@index([playerId])
+  @@index([clubId])
+  @@index([competitionId])
+  @@index([seasonId])
+  @@index([position])
+}
