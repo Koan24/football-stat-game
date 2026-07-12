@@ -10,12 +10,12 @@ function ScoreItem({ label, value }) {
   )
 }
 
-function ScorePanel() {
+function ScorePanel({ totalScore, selectedCount }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-white/10 bg-neutral-900 shadow-lg shadow-black/20">
       <div className="grid grid-cols-2 divide-x divide-white/10">
-        <ScoreItem label="Total score" value="0" />
-        <ScoreItem label="Players selected" value="0 / 5" />
+        <ScoreItem label="Total score" value={totalScore} />
+        <ScoreItem label="Players selected" value={`${selectedCount} / 5`} />
       </div>
     </section>
   )

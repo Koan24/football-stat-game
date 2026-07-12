@@ -1,6 +1,8 @@
+import { useMemo, useState } from "react"
 import Header from "./components/Header"
 import ScorePanel from "./components/ScorePanel"
 import GameSlot from "./components/GameSlot"
+import PlayerModal from "./components/PlayerModal"
 
 const gameSlots = [
   {
@@ -9,6 +11,7 @@ const gameSlots = [
     period: "2015/16–2022/23",
     position: "Forward",
     scoreCategory: "Goals",
+    scoreMetric: "goals",
   },
   {
     id: 2,
@@ -16,6 +19,7 @@ const gameSlots = [
     period: "2018/19–2024/25",
     position: "Midfielder",
     scoreCategory: "Assists",
+    scoreMetric: "assists",
   },
   {
     id: 3,
@@ -23,6 +27,7 @@ const gameSlots = [
     period: "2012/13–2021/22",
     position: "Forward",
     scoreCategory: "Goals",
+    scoreMetric: "goals",
   },
   {
     id: 4,
@@ -30,17 +35,46 @@ const gameSlots = [
     period: "2014/15–2023/24",
     position: "Defender",
     scoreCategory: "Appearances",
+    scoreMetric: "appearances",
   },
   {
     id: 5,
     club: "Liverpool",
     period: "2017/18–2024/25",
     position: "Goalkeeper",
-    scoreCategory: "Clean sheets",
+    scoreCategory: "Appearances",
+    scoreMetric: "appearances",
   },
 ]
 
 function App() {
+  const [activeSlot, setActiveSlot] = useState(null)
+  const [selections, setSelections] = useState({})
+
+  const selectedCount = Object.keys(selections).length
+
+  const totalScore = useMemo(() => {
+    return Object.values(selections).reduce(
+      (sum, selection) => sum + selection.score,
+      0,
+    )
+  }, [selections])
+
+  const handleConfirmSelection = ({ player, season }) => {
+    const score = season[activeSlot.scoreMetric] ?? 0
+
+    setSelections((currentSelections) => ({
+      ...currentSelections,
+      [activeSlot.id]: {
+        player,
+        season,
+        score,
+      },
+    }))
+
+    setActiveSlot(null)
+  }
+
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
       <Header />
@@ -49,20 +83,23 @@ function App() {
         <section className="mb-8">
           <div className="mb-4">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-green-500">
-              Today&apos;s category
+              Today&apos;s challenge
             </p>
 
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-white">
-              Goals
+              Mixed statistics
             </h2>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-400 sm:text-base">
-              Select one valid footballer and season for every row. Your score
-              is based on the number of goals recorded in the selected season.
+              Select one footballer and season for every row. Each row uses its
+              own scoring statistic.
             </p>
           </div>
 
-          <ScorePanel />
+          <ScorePanel
+            totalScore={totalScore}
+            selectedCount={selectedCount}
+          />
         </section>
 
         <section>
@@ -76,7 +113,7 @@ function App() {
             </div>
 
             <span className="text-sm font-medium text-neutral-500">
-              5 guesses remaining
+              {5 - selectedCount} guesses remaining
             </span>
           </div>
 
@@ -89,6 +126,8 @@ function App() {
                 period={slot.period}
                 position={slot.position}
                 scoreCategory={slot.scoreCategory}
+                selection={selections[slot.id]}
+                onSelect={() => setActiveSlot(slot)}
               />
             ))}
           </div>
@@ -98,6 +137,13 @@ function App() {
           Football Stat Game — development prototype
         </footer>
       </main>
+
+      <PlayerModal
+        isOpen={Boolean(activeSlot)}
+        slot={activeSlot}
+        onClose={() => setActiveSlot(null)}
+        onConfirm={handleConfirmSelection}
+      />
     </div>
   )
 }
