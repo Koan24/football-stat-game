@@ -166,16 +166,15 @@ function App() {
         </footer>
       </main>
 
-      <PlayerModal
-        isOpen={Boolean(activeSlot)}
-        slot={activeSlot}
-        selections={selections}
-        currentSelection={
-          activeSlot ? selections[activeSlot.id] ?? null : null
-        }
-        onClose={() => setActiveSlot(null)}
-        onConfirm={handleConfirmSelection}
-      />
+      {activeSlot && (
+        <PlayerModal
+          slot={activeSlot}
+          selections={selections}
+          currentSelection={selections[activeSlot.id] ?? null}
+          onClose={() => setActiveSlot(null)}
+          onConfirm={handleConfirmSelection}
+        />
+      )}
     </div>
   )
 }

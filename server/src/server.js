@@ -3,6 +3,7 @@ import express from "express"
 import cors from "cors"
 import { prisma } from "./lib/prisma.js"
 import { footballApiRequest } from "./lib/footballApi.js"
+import playersRouter from "./routes/players.js"
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -14,6 +15,8 @@ app.use(
 )
 
 app.use(express.json())
+
+app.use("/api/players", playersRouter)
 
 app.get("/api/health", async (req, res, next) => {
   try {
